@@ -3,47 +3,48 @@ import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphFactory;
 import java.io.File;
 
-public class SampleGraphApp{
+public class FoundationDBGraphApp{
     private JanusGraph graph;
     private GraphTraversalSource g;
 
     public static void main(String[] args){
-        SampleGraphApp app = new SampleGraphApp();
+        FoundationDBGraphApp app = new FoundationDBGraphApp();
         try{
-            app.initializeBerkeleyDBGraph();
+            app.initializeFoundationDBGraph();
             app.initializeSchema();
             app.loadSampleData();
             app.findStorageSize();
             app.closeGraph();
         }
-        catch (Exception error){
-            System.err.println("Error for BerkeleyDB graph");
+        catch(Exception error){
+            System.err.println("Error for FoundationDB graph");
             error.printStackTrace();
         }
     }
 
-//    public void initializeInMemoryGraph(){
-//        graph = JanusGraphFactory.build().set("storage.backend", "inmemory").open();
-//        g = graph.traversal();
-//        System.out.println("Successfully loaded in-memory graph");
-//    }
-
-    public void initializeBerkeleyDBGraph(){
-        File file = new File("berkeley-db");
+    public void initializeFoundationDBGraph(){
+        File file = new File("fdb-data");
 
         try{
-            if(file.exists()){
+            if (file.exists()){
                 deleteDirectory(file);
             }
             file.mkdirs();
         }
         catch(Exception error){
-            System.err.println("Failed to initialize BerkeleyDB");
+            System.err.println("Failed to initialize FoundationDB");
         }
 
-        graph = JanusGraphFactory.build().set("storage.backend", "berkeleyje").set("storage.directory", "berkeley-db").open();
+        //had to do all of this, so it opened properly lol
+        graph = JanusGraphFactory.build()
+                .set("storage.backend", "org.janusgraph.diskstorage.foundationdb.FoundationDBStoreManager")
+                .set("storage.directory", "fdb-data")
+                .set("storage.foundationdb.directory", "C:\\ProgramData\\foundationdb")
+                .set("storage.foundationdb.cluster-file", "C:\\ProgramData\\foundationdb\\fdb.cluster")
+                .set("index.search.backend", null)
+                .open();
         g = graph.traversal();
-        System.out.println("Successfully loaded BerkeleyDB graph");
+        System.out.println("Successfully loaded FoundationDB graph");
     }
 
     private boolean deleteDirectory(File directory){

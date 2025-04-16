@@ -37,6 +37,45 @@
             <version>${janusgraph.version}</version>
         </dependency>
 
+        <!-- JanusGraph Lucene Index Backend -->
+        <dependency>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-lucene</artifactId>
+            <version>${janusgraph.version}</version>
+        </dependency>
+
+        <!-- Add ElasticSearch dependency to prevent class not found error -->
+        <dependency>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-es</artifactId>
+            <version>${janusgraph.version}</version>
+        </dependency>
+
+        <!-- JanusGraph FoundationDB Storage Backend -->
+        <dependency>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-foundationdb</artifactId>
+            <version>1.0.0-nugraph-1.9.4-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/janusgraph-foundationdb-1.0.0-nugraph-1.9.4-SNAPSHOT.jar</systemPath>
+        </dependency>
+
+        <!-- FoundationDB Java Client - Using Maven repository location -->
+        <dependency>
+            <groupId>org.foundationdb</groupId>
+            <artifactId>fdb-java</artifactId>
+            <version>6.2.30</version>
+        </dependency>
+
+        <!-- NuGraph Call Tracing -->
+        <dependency>
+            <groupId>com.ebay.nugraph</groupId>
+            <artifactId>nugraph-calltracing</artifactId>
+            <version>1.6.5-RELEASE</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/nugraph-calltracing-1.6.5-RELEASE.jar</systemPath>
+        </dependency>
+
         <!-- Apache Commons CSV for parsing -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -50,6 +89,13 @@
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
         </dependency>
+
+        <!-- SLF4J Simple binding -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.36</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -61,6 +107,37 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+            <!-- Maven Shade Plugin for creating a fat JAR with all dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>FoundationDBGraphApp</mainClass>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Exec Maven Plugin for running with command line args -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>FoundationDBGraphApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>
